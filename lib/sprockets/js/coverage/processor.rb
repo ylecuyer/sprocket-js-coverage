@@ -16,9 +16,6 @@ module Sprockets
 
           uri = URI.parse(input[:uri])
 
-          return source if uri.path =~ /\/home\/ylecuyer\/Projects\/engage-digital\/vendor\/assets\//
-          return source unless uri.path =~ /\/home\/ylecuyer\/Projects\/engage-digital\//
-
           s = Time.now
 
           puts "===> #{uri.path}"
