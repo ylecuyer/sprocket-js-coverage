@@ -19,10 +19,10 @@ module Sprockets
           return source if uri.path =~ /\/home\/ylecuyer\/Projects\/engage-digital\/vendor\/assets\//
           return source unless uri.path =~ /\/home\/ylecuyer\/Projects\/engage-digital\//
 
-          #s = Time.now
+          s = Time.now
 
-          # puts "===> #{uri.path}" if uri.path =~ /scrolling/
-          stdin, stdout, stderr, wait_thr = Open3.popen3("node --max-old-space-size=8192 /home/ylecuyer/.nvm/versions/node/v16.17.1/bin/nyc-stdin-instrumenter #{uri.path}")
+          puts "===> #{uri.path}"
+          stdin, stdout, stderr, wait_thr = Open3.popen3("nyc-stdin-instrumenter #{uri.path}")
 
           stdin.write source
           stdin.close
@@ -38,8 +38,8 @@ module Sprockets
 
           stderr.close
 
-          #elapsed = Time.now - s
-          #puts "Took: #{elapsed}s for #{uri.path}"
+          elapsed = Time.now - s
+          puts "Took: #{elapsed}s for #{uri.path}"
 
           covered_source
         end
