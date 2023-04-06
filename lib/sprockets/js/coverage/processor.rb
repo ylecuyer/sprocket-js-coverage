@@ -16,6 +16,10 @@ module Sprockets
 
           uri = URI.parse(input[:uri])
 
+          if Sprockets::Js::Coverage.config.should_process
+            return unless Sprockets::Js::Coverage.config.should_process.call(uri)
+          end
+
           s = Time.now
 
           puts "===> #{uri.path}"
