@@ -20,9 +20,6 @@ module Sprockets
             return unless Sprockets::Js::Coverage.config.should_process.call(uri)
           end
 
-          s = Time.now
-
-          puts "===> #{uri.path}"
           stdin, stdout, stderr, wait_thr = Open3.popen3("nyc-stdin-instrumenter #{uri.path}")
 
           stdin.write source
@@ -38,9 +35,6 @@ module Sprockets
           end
 
           stderr.close
-
-          elapsed = Time.now - s
-          puts "Took: #{elapsed}s for #{uri.path}"
 
           covered_source
         end
