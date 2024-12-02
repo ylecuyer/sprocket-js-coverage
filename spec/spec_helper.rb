@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "propshaft/js/coverage"
+require "sprockets/js/coverage"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
