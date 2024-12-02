@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["yoann.lecuyer@gmail.com"]
 
   spec.summary = "Add coverage to your JavaScript files"
-  spec.description = "Adds a sprocket compiler to add coverage to your JavaScript files"
+  spec.description = "Adds a sprocket processor to add coverage to your JavaScript files"
   spec.homepage = "https://github.com/ylecuyer/sprockets-js-coverage"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
