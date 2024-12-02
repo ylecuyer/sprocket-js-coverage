@@ -1,7 +1,7 @@
 var { createInstrumenter } = require('istanbul-lib-instrument')
 
 var instrumenter = createInstrumenter({
-  esModules: true,
+  esModules: false,
   coverageGlobalScopeFunc: false,
   coverageGlobalScope: 'window',
 })
