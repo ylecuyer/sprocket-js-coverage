@@ -6,7 +6,7 @@ Add this line to your application's Gemfile:
 gem 'sprockets-js-coverage'
 ```
 
-Add the compiler to propshaft
+Add the processor to sprockets
 
 ```ruby
 # config/initializers/assets.rb
@@ -20,9 +20,9 @@ if ENV["COVERAGE"]
     }
   end
 
-  Rails.application.config.assets.compilers << [
-    "text/javascript", Sprockets::Js::Coverage::Processor
-  ]
+  Rails.application.config.assets.configure do |env|
+    env.register_postprocessor('application/javascript', Sprockets::Js::Coverage::Processor)
+  end
 end
 ```
 
