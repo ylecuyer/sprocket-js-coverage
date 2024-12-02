@@ -1,35 +1,75 @@
-# Sprockets::Js::Coverage
+# Installation
 
-TODO: Delete this and the text below, and describe your gem
+Add this line to your application's Gemfile:
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sprockets/js/coverage`. To experiment with that code, run `bin/console` for an interactive prompt.
+```ruby
+gem 'sprockets-js-coverage'
+```
 
-## Installation
+Add the processor to sprockets
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+```ruby
+# config/initializers/assets.rb
 
-Install the gem and add to the application's Gemfile by executing:
+if ENV["COVERAGE"]
+  Sprockets::Js::Coverage::Processor.configure do |config|
+    config.should_process = ->(path) {
+      return false if path.match?(/vendor\/assets\//)
+      return false if path.match?(/gems\//)
+      return true
+    }
+  end
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+  Rails.application.config.assets.configure do |env|
+    env.register_postprocessor('application/javascript', Sprockets::Js::Coverage::Processor)
+  end
+end
+```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+Get the coverage reports after running your tests
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+# test/application_system_test_case.rb
 
-## Usage
+require "test_helper"
 
-TODO: Write usage instructions here
+class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+def teardown
+    __coverage__ = page.evaluate_script <<-JS
+        JSON.stringify((typeof __coverage__ !== 'undefined') ? __coverage__ : null)
+    JS
 
-## Development
+    if __coverage__ != "null"
+      File.write("#{JS_COVERAGE_DIR}/#{Time.now.to_i.to_s}.json", __coverage__)
+    end
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+    super
+  end
+end
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Convert to lcov and generate html report
 
-## Contributing
+```bash
+nyc report --reporter=lcov --temp-dir tmp/js-coverage --report-dir tmp/js-coverage
+genhtml -q -o ./coverage ./tmp/js-coverage/lcov.info ./coverage/lcov/simplecov.lcov
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/sprockets-js-coverage.
+# How it works
 
-## License
+This gem uses istanbul instrumenter to add coverage to your javascript files. It will add a global variable `__coverage__` to your javascript files. You can then use this variable to get the coverage report.
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+# Configuration
+
+TBD
+
+# Contributing
+
+Clone the repo and run `bundle install` to install the dependencies.
+
+Prepare the js script by running `yarn install` and `yarn run build` in the `js/instrumenter` directory.
+
+# Release
+
+Run `./scripts/release.sh` to release a new version after updating the version in `lib/sprockets/js/coverage/version.rb`.
+

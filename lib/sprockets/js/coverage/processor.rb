@@ -1,5 +1,4 @@
 require 'uri'
-require 'open3'
 
 module Sprockets
   module Js
@@ -7,36 +6,35 @@ module Sprockets
       class Processor
         VERSION = '1'
 
-        def self.cache_key
-          @cache_key ||= "#{name}:#{VERSION}".freeze
-        end
-
-        def self.call(input)
-          source = input[:data]
-
-          uri = URI.parse(input[:uri])
-
-          if Sprockets::Js::Coverage.config.should_process
-            return unless Sprockets::Js::Coverage.config.should_process.call(uri)
+        class << self
+          def configure
+            yield config
           end
 
-          stdin, stdout, stderr, wait_thr = Open3.popen3("nyc-stdin-instrumenter #{uri.path}")
-
-          stdin.write source
-          stdin.close
-
-          covered_source = stdout.read
-          stdout.close
-
-          error_msg = stderr.read
-          unless error_msg.blank?
-            puts "Error: #{uri.path}"
-            puts error_msg
+          def config
+            @config ||= Configuration.new
           end
 
-          stderr.close
+          def cache_key
+            @cache_key ||= "#{name}:#{VERSION}".freeze
+          end
 
-          covered_source
+          def call(input)
+            source = input[:data]
+            uri = URI.parse(input[:uri])
+
+            if Sprockets::Js::Coverage::Processor.config.should_process
+              return unless Sprockets::Js::Coverage::Processor.config.should_process.call(uri.path)
+            end
+
+            begin
+              covered_source = $context.call("instrument", source, uri.path.to_s)
+            rescue => e
+              warn "Error instrumenting #{uri.path}: #{e}"
+              return source
+            end
+            covered_source
+          end
         end
       end
     end
